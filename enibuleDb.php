@@ -1,9 +1,10 @@
 <?php
 
 /**
-	 * Author : HAMZA MASMOUDI | contact@enibule.com
-	 * WebSite : www.enibule.com
-	 * Version : 1.2
+ * Author  : HAMZA MASMOUDI [contact@enibule.com]
+ * Website : http://enibule.com
+ * Github  : https://github.com/enibule/enibule-db
+ * Version : 1.0
 **/
 
 class enibuleDb{
@@ -19,7 +20,7 @@ class enibuleDb{
     	
 	/**
 	 * construct of class 
-	*/	
+	**/	
 	public function __construct(){
         
 		$conf = enibuleConf::$databases[$this->conf];
@@ -43,7 +44,7 @@ class enibuleDb{
 				if(enibuleConf::$debug >=1){
 				   die($e->getMessage());
 				}else{
-				   die('Impossible de se connecter à la base de donnée');	
+				   die('Error establishing a database connection');	
 				}
 			}
 	}
@@ -52,9 +53,10 @@ class enibuleDb{
 	 * Find
 	 *
 	 * @param array $req
+	 * @param bool $return_obj (if $return_obj is false the function return an array)
 	 * @return stdClass Object
-	*/	
-	public function find($req = array(),$return='OBJ'){
+	**/	
+	public function find($req = array(),$return_obj=true){
 		$sql = 'SELECT ';
 		if(isset($req['fields'])){
 			if(is_array($req['fields'])){
@@ -71,26 +73,25 @@ class enibuleDb{
 			if (!is_array($req['join'])) 
 				$sql .= ' JOIN  '. $req['join'].' as '.ucfirst(rtrim($req['join'], 's')). ' ';
 			else {
-				$join = array();
-				foreach ($req['join'] as $k => $v) {
-					$join[] = "$v JOIN $k as ".ucfirst(rtrim($k, 's'));
-				}
-				$sql .= implode(' ', $join). ' ';
-				
-			}
-
-				if(isset($req['on'])){
-					$sql .= ' ON ';
-					if (is_array($req['on'])) {
-						$on = array();
-						foreach($req['on'] as $k=>$v){
-							$on[] = "$k=$v";
+				$join_query = array();
+				foreach ($req['join'] as $joins) {
+					foreach ($joins as $joinType => $join) {
+						$from = $join['from'];
+						$sql_join = "$joinType JOIN $from as ".ucfirst(rtrim($from, 's'));
+						if(isset($join['on'])){
+							$on = array();
+							foreach ($join['on'] as $primaryKey => $foreignKey) {
+								if($primaryKey == $this->primaryKey)
+									$primaryKey = ucfirst(rtrim($this->table, 's')).'.'.$primaryKey;
+								$on[] = "$primaryKey = $foreignKey";
+							}
+							$sql_join .= ' ON '.implode(' AND ',$on);
 						}
-						$sql .= implode(' AND ',$on). ' ';
-					}else{
-						$sql .= $req['on']. ' ';
+						$join_query[] = $sql_join;
 					}
 				}
+				$sql .= implode(' ', $join_query). ' ';
+			}
 		}
 		if(isset($req['conditions'])){
 			$sql .= 'WHERE ';
@@ -113,10 +114,10 @@ class enibuleDb{
 		if(isset($req['limit'])){
 			$sql .= ' Limit '.$req['limit'];
 		}
-
+		
 		$pre = $this->db->prepare($sql);
 		$pre->execute();
-		if($return=='OBJ'){
+		if($return_obj){
 		  return $pre->fetchAll(PDO::FETCH_OBJ);
 		}else{
 		  return $pre->fetchAll(PDO::FETCH_ASSOC);	
@@ -124,21 +125,22 @@ class enibuleDb{
 	}
 	
 	/**
-	 * Find first Data
+	 * Find first
 	 *
 	 * @param array $req
 	 * @return stdClass Object
-	*/	
-	public function findFirst($req=array()){
+	**/	
+	public function findFirst($req=null){
+		$req = (empty($req)) ? array() : $req;
         return current($this->find($req));
 	}
 	
 	/**
-	 * Find first Data
+	 * Find Count
 	 *
 	 * @param array $conditions
-	 * @return integer
-	*/	
+	 * @return int number
+	**/	
 	public function findCount($conditions){
         $res = $this->findFirst(array(
 		           'fields'     => 'COUNT('.$this->primaryKey.') as count',
@@ -148,10 +150,10 @@ class enibuleDb{
 	}
 	
 	/**
-	 * Delete Data
+	 * Delete
 	 *
 	 * @param integer $id
-	*/	
+	**/	
 	public function delete($id){
 		$sql = "DELETE FROM {$this->table} WHERE {$this->primaryKey} = $id";
 		$this->db->query($sql);
@@ -191,36 +193,6 @@ class enibuleDb{
 			$this->id = $data->$key;
 		}
 	}
-	
-	/**
-	 * validate DATA
-	**/
-	public function validate($data,$d){
-	  $errors = array();
-	  foreach($d as $k=>$v){
-		   if(!isset($data->$k)){
-			   $errors[$k] = $v['message'];
-		   }else{
-			   if($v['rule'] == 'notEmpty'){
-				   if(empty($data->$k)){
-				       $errors[$k] = $v['message'];  
-				   }
-			   }elseif(!preg_match('/^'.$v['rule'].'$/',$data->$k)){
-				   $errors[$k] = $v['message'];  
-			   }
-		   }
-	  }
-	  
-	  if(empty($errors)){
-	  	 return true;
-	  }else{
-	  	 $er;
-	     foreach($errors as $k=>$v){
-		   $er[]= $v;
-	     }
-	     return implode('</br>', $er);
-	  }
-   }
 }
 
 ?>
