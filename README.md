@@ -15,7 +15,7 @@ To see more information on how to use enibule-db please visite : http://enibule.
 Example Finding Your Data
 =========================
 
-
+<pre>
 $Db = new enibuleDb();
 $Db->table='users';
 
@@ -49,53 +49,54 @@ $getAdminUser = $Db->find(array(
 	'conditions' => array('role'=>'2')	
 ));
 
-
+</pre>
 ===== If you want to return data in an array format: 
-
+<pre>
 $getAdminUser = $Db->find(array(
 	'fields' 	 => array('id', 'username'),
 	'conditions' => array('role'=>'2')	
 ),false);
-
+</pre>
 ===== Get first data
-
+<pre>
 $user = $Db->findFirst();
-
+</pre>
 
 
 
 
 Example Saving Your Data
 =========================
-
+<pre>
 $Db->save(array(
     'username' => 'HAMZA MASMOUDI',
     'email'    => 'contact@enibule.com',
     'country'  => 'Morocco'    
 ));
-
+</pre>
 ===== Get inserted id
-
+<pre>
 $insertId = $Db->save(array(
     'username' => 'hamza.masmoudi',
     'email'    => 'contact@enibule.com',
     'country'  => 'Morocco'    
 ));
-
+</pre>
 
 ===== Updating Your data
-
+<pre>
 $Db->save(array(
     'id'       => $insertId,
     'username' => 'enibule',
     'email'    => 'hamza@enibule.com'    
 ));
-
+</pre>
 
 
 
 
 Example Deleting Your Data
 =========================
-
+<pre>
 $Db->delete($insertId);
+</pre>
