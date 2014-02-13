@@ -1,67 +1,102 @@
 <?php
 
-include('enibuleConf.php');
 include('enibuleDb.php');
 
 enibuleConf::$databases = array(
 		     'default' => array(
-					  'host'     => '192.168.1.10',
-					  'database' => 'cg_dev',
-					  'login'    => 'cg_dev',
-					  'password' => 'cty486dv'
+					  'host'     => 'localhost',
+					  'database' => 'enibule',
+					  'login'    => 'root',
+					  'password' => ''
 ));
+
+
+/*
+Example Finding Your Data
+=========================
+
 
 $Db = new enibuleDb();
 $Db->table='users';
 
-/*$user = $Db->find(array(
-	'fields' 	 => 'id, filename',
-	'conditions' => array('id>'=>'1'),
-	'order'		 => 'id DESC',
-	'limit'	     => '0,3'
-));*/
 
-$user = $Db->find(array(
+
+$getUsersId = $Db->find(array(
+	'fields'  => 'id',
+	'order'	  => 'id DESC',
+	'limit'	  => '0,10'
+));
+
+$getUsersAssets = $Db->find(array(
+	'fields'  => 'id, username, email',
 	'join' => array(
 		array(
 			'INNER' => array(
-				'from' => 'apartments',
+				'from' => 'assets',
 				'on'   => array(
-					'id'=>'Apartment.user_id'
+					'id'=>'Asset.user_id'
 				)	
 			)
 		)
 	),
-	'conditions' => 'firstname != ""',
+	'conditions' => 'Asset.online = 1',
 	'order'		 => 'User.id DESC',
-	'limit'	     => '0,3'
+	'limit'	     => '0,10'
 ));
-print_r($user);die;
 
-$user = $Db->find(array(
-	'fields' => 'id, filename',
-	'conditions' => array('id'=>'1')	
+$getAdminUser = $Db->find(array(
+	'fields' 	 => array('id', 'username'),
+	'conditions' => array('role'=>'2')	
 ));
-//print_r($user);die;
 
-$user = $Db->find(1,false);
-//print_r($user);
+
+===== If you want to return data in an array format: 
+
+$getAdminUser = $Db->find(array(
+	'fields' 	 => array('id', 'username'),
+	'conditions' => array('role'=>'2')	
+),false);
+
+===== Get first data
 
 $user = $Db->findFirst();
-print_r($user);
 
-//Add data
-$insertId = $Db->save(array(
+
+
+
+
+Example Saving Your Data
+=========================
+
+$Db->save(array(
     'username' => 'HAMZA MASMOUDI',
-    'email'    => 'contact@enibule.com'    
+    'email'    => 'contact@enibule.com',
+    'country'  => 'Morocco'    
 ));
 
-//Update data
+===== Get inserted id
+
+$insertId = $Db->save(array(
+    'username' => 'hamza.masmoudi',
+    'email'    => 'contact@enibule.com',
+    'country'  => 'Morocco'    
+));
+
+
+===== Updating Your data
+
 $Db->save(array(
     'id'       => $insertId,
-    'username' => 'NEW USER',
-    'email'    => 'email@domaine.com'    
+    'username' => 'enibule',
+    'email'    => 'hamza@enibule.com'    
 ));
 
-//Delete data
+
+
+
+
+Example Deleting Your Data
+=========================
+
 $Db->delete($insertId);
+*/

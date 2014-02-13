@@ -1,5 +1,7 @@
 <?php
 
+require_once('enibuleConf.php');
+
 /**
  * Author  : HAMZA MASMOUDI [contact@enibule.com]
  * Website : http://enibule.com
